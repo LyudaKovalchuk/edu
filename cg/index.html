@@ -8,6 +8,7 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gl-matrix/2.4.0/gl-matrix-min.js" defer></script>
     <script src="index.js" defer></script>
+    <script src="ButtonsListener.js" defer></script>
 
     <script id="fragment.lab#1" type="x-shader/x-fragment" src="lab1/fragment-shader.js" defer>
         void main() {
@@ -22,39 +23,69 @@
         }
     </script>
 
-    <script id="fragment.lab#2" type="x-shader/x-fragment" src="lab1/fragment-shader.js" defer>
+    <script id="fragment.lab#2" type="x-shader/x-fragment" defer>
         precision mediump float;
+
         varying vec2 vTextureCoord;
+        varying vec3 vLightWeighting;
 
-        uniform sampler2D uSampler;
+        uniform sampler2D textureUniform;
 
-        void main(void) {
-            gl_FragColor = texture2D(uSampler, vec2(vTextureCoord.s, vTextureCoord.t));
+        void main() {
+            vec4 textureColor = texture2D(textureUniform, vec2(vTextureCoord.s, vTextureCoord.t));
+            gl_FragColor = vec4(textureColor.rgb * vLightWeighting, textureColor.a);
         }
     </script>
-    <script id="vertex.lab#2"  type="x-shader/x-vertex" src="lab1/vertex-shader.js" defer>
+    <script id="vertex.lab#2"  type="x-shader/x-vertex" defer>
+        precision mediump float;
+
         attribute vec3 vertexPosition;
-        attribute vec2 vertexTexture;
+        attribute vec2 vertexTexturePosition;
+        attribute vec3 vertexNormal;
 
         uniform mat4 modelUniform;
         uniform mat4 perspectiveUniform;
         uniform mat4 cameraUniform;
 
+        uniform mat3 normalUniform;
+        uniform vec3 lightingDirection;
+        uniform vec3 directionalColor;
+        uniform vec3 ambientColor;
+        uniform bool useLighting;
+
         varying vec2 vTextureCoord;
+        varying vec3 vLightWeighting;
 
         void main() {
             gl_Position = perspectiveUniform * cameraUniform * modelUniform * vec4(vertexPosition, 1.0);
-            vTextureCoord = vertexTexture;
+
+            if (!useLighting) {
+                vLightWeighting = vec3(1.0, 1.0, 1.0);
+            } else {
+                vec3 transformedNormal = normalUniform * vertexNormal;
+                float directionalLightWeighting = max(dot(transformedNormal, lightingDirection), 0.0);
+                vLightWeighting = ambientColor + directionalColor * directionalLightWeighting;
+            }
+            vTextureCoord = vertexTexturePosition;
         }
     </script>
 
-
-
+    <script src="lab2/primitives/Color.js" defer></script>
+    <script src="lab2/primitives/Vector.js" defer></script>
+    <script src="lab2/primitives/Point.js" defer></script>
+    <script src="lab2/Movable.js" defer></script>
+    <script src="lab2/Rotatable.js" defer></script>
+    <script src="lab2/Camera.js" defer></script>
+    <script src="lab2/Lighting.js" defer></script>
+    <script src="lab2/Figure.js" defer></script>
+    <script src="lab2/figures/Surface.js" defer></script>
+    <script src="lab2/figures/Sphere.js" defer></script>
+    <script src="lab2/figures/SphereLighting.js" defer></script>
     <script src="lab2/GLoader.js" defer></script>
-    <script src="lab2/VertexContainer.js" defer></script>
     <script src="lab2/index.js" defer></script>
 </head>
 <body class="root">
     <canvas id="canvas"></canvas>
+    <form name="radioButtons" class="flexbox" id="buttons"></form>
 </body>
 </html>

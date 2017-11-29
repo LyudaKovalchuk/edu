@@ -28,21 +28,44 @@ class GLoader {
         this.gl.uniform[name] = this.gl.getUniformLocation(this.program, name);
     }
 
-    setUniform(name, variable) {
+    setUniformMatrix(name, variable) {
         this.gl.uniformMatrix4fv(this.gl.uniform[name], false, variable);
+    }
+
+    setUniformMatrix3(name, variable) {
+        this.gl.uniformMatrix3fv(this.gl.uniform[name], false, variable);
+    }
+
+    setFloatUniform(name, variable) {
+        this.gl.uniform1f(this.gl.uniform[name], variable);
+    }
+
+    setVec4Uniform(name, variable) {
+        this.gl.uniform4fv(this.gl.uniform[name], variable);
+    }
+
+
+    setVec3Uniform(name, variable) {
+        this.gl.uniform3fv(this.gl.uniform[name], variable);
+    }
+
+    setUniform1i(name, variable) {
+        this.gl.uniform1i(this.gl.uniform[name], variable);
     }
 
     initBuffer(name, vertexConteiner) {
         this.gl.buffers[name] = this.gl.createBuffer();
         this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.gl.buffers[name]);
-        this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(vertexConteiner.source), this.gl.STATIC_DRAW);
+        this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(vertexConteiner), this.gl.STATIC_DRAW);
     }
 
     initTexture(name, url) {
 
         const { gl } = this,
             texture = gl.createTexture();
-        texture.image = new Image(256, 256);
+
+        texture.url = url;
+        texture.image = new Image();
         texture.image.onload = () => {
             gl.bindTexture(gl.TEXTURE_2D, texture);
             gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
@@ -112,7 +135,7 @@ class GLoader {
         this.gl.compileShader(shader);
 
         if(!this.gl.getShaderParameter(shader, this.gl.COMPILE_STATUS))
-            throw new Error(`Error during compiling shader ${id}.`);
+            throw new Error(`Error during compiling shader ${id}: ${this.gl.getShaderInfoLog(shader)}`);
 
         return shader;
     }
